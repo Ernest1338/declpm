@@ -1,2 +1,2 @@
 # declarch
-Declarative arch package management
+Declarative package management made easy
