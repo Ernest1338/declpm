@@ -9,19 +9,25 @@ GREEN = "\x1b[32m"
 RESET = "\x1b[00m"
 
 def preproces_includes(lines, dirname):
-    for (i, line) in enumerate(lines):
+    new_lines = []
+    for line in lines:
         if line.startswith("@include"):
             filename = line.split()[1]
-            new_lines = open(os.path.join(dirname, filename), "r").readlines()
-            lines = lines[:i] + new_lines + lines[i+1:]
-    return lines
+            included_lines = open(os.path.join(dirname, filename), "r").readlines()
+            new_lines += preproces_includes(included_lines, dirname)
+        else:
+            new_lines.append(line)
+
+    return new_lines
 
 
 def get_packages(file="config.conf"):
     abs_path = os.path.abspath(file)
     dirname =os.path.dirname(abs_path)
+
     lines = open(file, "r").readlines()
     lines = preproces_includes(lines, dirname)
+
     packages = []
     for line in lines:
         if line.strip() != "" and not line.strip().startswith("#"):
@@ -79,7 +85,7 @@ def main():
             cmd = f"sudo zypper rm -y {' '.join(to_remove)}"
         elif pkg_mgr == "alpine":
             cmd = f"sudo apk del {' '.join(to_remove)}"
-        print(f"{GREEN}[+] Running: {cmd}{RESET}")
+        print(f"{GREEN}[+] {RESET}Running: {GREEN}{cmd}{RESET}")
         os.system(cmd)
 
     # Sync packages
@@ -96,13 +102,13 @@ def main():
             cmd = f"sudo zypper in -y {' '.join(packages)}"
         elif pkg_mgr == "alpine":
             cmd = f"sudo apk add {' '.join(packages)}"
-        print(f"{GREEN}[+] Running: {cmd}{RESET}")
+        print(f"{GREEN}[+] {RESET}Running: {GREEN}{cmd}{RESET}")
         os.system(cmd)
 
     # Save packages to state file (state/package-mon) - pickle
     open(STATE_FILE, "wb").write(pickle.dumps(packages))
 
-    print(f"{GREEN}[+] Sync complete{RESET}")
+    print(f"{GREEN}[+] {RESET}Sync complete")
 
 
 if __name__=="__main__":
