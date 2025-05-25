@@ -67,7 +67,8 @@ def main():
     # Uninstall removed packages
     if len(to_remove) != 0:
         if pkg_mgr == "arch":
-            cmd = f"sudo pacman -R {' '.join(to_remove)}"
+            # -Rns to remove config files and unused dependencies as well
+            cmd = f"sudo pacman -Rns {' '.join(to_remove)}"
         elif pkg_mgr == "ubuntu":
             cmd = f"sudo apt-get remove -y {' '.join(to_remove)}"
         elif pkg_mgr == "fedora":
