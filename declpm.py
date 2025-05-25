@@ -8,18 +8,20 @@ STATE_FILE = os.environ["XDG_STATE_HOME"] + "/package-mon"
 GREEN = "\x1b[32m"
 RESET = "\x1b[00m"
 
-def preproces_includes(lines):
+def preproces_includes(lines, dirname):
     for (i, line) in enumerate(lines):
         if line.startswith("@include"):
             filename = line.split()[1]
-            new_lines = open(filename, "r").readlines()
+            new_lines = open(os.path.join(dirname, filename), "r").readlines()
             lines = lines[:i] + new_lines + lines[i+1:]
     return lines
 
 
 def get_packages(file="config.conf"):
+    abs_path = os.path.abspath(file)
+    dirname =os.path.dirname(abs_path)
     lines = open(file, "r").readlines()
-    lines = preproces_includes(lines)
+    lines = preproces_includes(lines, dirname)
     packages = []
     for line in lines:
         if line.strip() != "" and not line.strip().startswith("#"):
